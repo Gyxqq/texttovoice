@@ -15,6 +15,7 @@ def save ():
 async def savem(text,save_name):
     com=edge_tts.Communicate(text,"zh-CN-XiaoyiNeural")
     path=save_name+".mp3"
+    if save_name=="":path="output.mp3"
     await com.save(path)
     #清除输入框
     inputbox.delete("1.0", "end")
