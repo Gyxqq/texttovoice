@@ -85,11 +85,15 @@ async def saveandplay(text,save_name):
 def load ():
     path = filedialog.askopenfilename() 
     try:
-        f=open(path,"r",encoding="utf-8")
+        f=open(path,"r",encoding=choose2.get())
     except:
-        messagebox.showinfo("Edge TTS", "文件打开失败")
+        messagebox.showinfo("Edge TTS", "文件打开失败,请检查文件路径或编码")
         return
-    ftext=f.read()
+    try:
+        ftext=f.read()
+    except:
+        messagebox.showinfo("Edge TTS", "文件读取失败,请检查文件编码")
+        return
     f.close()
     inputbox.insert("1.0",ftext)
    
@@ -1092,9 +1096,15 @@ minbox.place(x=300, y=600)
 botton2 = tkinter.Button(window, text="自动分割保存", font=("Microsoft YaHei", 15), command=savesplit)
 botton2.pack()
 botton2.place(x=540, y=597, width=150, height=35)
-fin=tkinter.Label(window, text="从txt文件加载(utf-8):", font=("Microsoft YaHei", 15),)
+fin=tkinter.Label(window, text="从txt文件加载:", font=("Microsoft YaHei", 15),)
 fin.pack(anchor="w")
 fin.place(x=0, y=660)
+choose2=ttk.Combobox(window,font=("Microsoft YaHei", 15),width=10)
+list2=['utf-8','gbk','ansi','utf-16']
+choose2['values']=list2
+choose2.pack(anchor="w")
+choose2.place(x=320, y=660)
+choose2.current(0)
 finbotton = tkinter.Button(window, text="加载文件", font=("Microsoft YaHei", 15), command=load)
 finbotton.pack()
 finbotton.place(x=200, y=660, width=100, height=35)
