@@ -7,6 +7,7 @@ from tkinter import filedialog
 from PIL import ImageTk, Image
 from tkinter import ttk
 import playsound
+import openai
 # Create a window
 
 
@@ -144,7 +145,126 @@ def search():
         if text.lower() in list[i].lower():
             list2.append(list[i])
     choose["values"]=list2
+def getmsg(a):
+    
+    completion = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            
+            {"role": "user", "content": a},
 
+        ]
+    )
+    s = completion.choices[0].message['content']
+    return s
+def gpt3(text):
+
+    try:
+        f3=open("config.txt","r",encoding="utf-8")
+    except:
+        messagebox.showinfo("Edge TTS", "配置文件读取失败,请添加api-key")
+        return 
+    config=f3.read()
+    f3.close()
+    config=config.split("@@")
+    openai.api_key = config[0]
+    if len(config)>1:
+        proxy={
+            "http":config[1],
+            "https":config[1]
+        }
+    if choose3.get()=="use proxy":
+        openai.proxy=proxy
+    print(openai.api_key,"\n",openai.proxy)  
+    # try:
+    text0=getmsg(text)
+    # except:
+    #     messagebox.showinfo("Edge TTS", "GPT-3请求失败,请检查api-key或代理")
+        # return
+    text31.insert("end",text0+"\n")
+    quest.delete("1.0", "end")
+    gptwindow.update()
+    return
+def GPT():
+    gptwindow.deiconify()
+    gptwindow.update()
+    text31.delete("1.0", "end")
+    text31.insert("end","输出框\n")
+    gptwindow.update()
+    gptwindow.mainloop()
+
+
+
+def savekey(text):
+  try:
+    f3=open("config.txt","r",encoding="utf-8")
+    config0=f3.read()
+    f3.close()
+    config0=config0.split("@@")
+    config0[0]=text
+    if len(config0)==1:
+        f3=open("config.txt","w",encoding="utf-8")
+        f3.write(config0[0])
+        f3.close()
+    else:
+        f3=open("config.txt","w",encoding="utf-8")
+        f3.write(config0[0]+"@@"+config0[1])
+        f3.close()
+  except:
+    f3=open("config.txt","w",encoding="utf-8")
+    f3.write(text)
+    f3.close()
+  key.delete("0", "end")
+  messagebox.showinfo("Edge TTS", "api-key已保存")
+  return
+
+
+def saveproxy(text):
+    try:
+        f3=open("config.txt","r",encoding="utf-8")
+        config0=f3.read()
+        f3.close()
+        config0=config0.split("@@")
+        
+        if len(config0)==1:
+            f3=open("config.txt","w",encoding="utf-8")
+            f3.write(config0[0]+"@@"+text)
+            f3.close()
+        else:
+            config0[1]=text
+            f3=open("config.txt","w",encoding="utf-8")
+            f3.write(config0[0]+"@@"+config0[1])
+            f3.close()
+        messagebox.showinfo("Edge TTS", "代理已保存")
+    except:
+         messagebox.showinfo("Edge TTS", "add api-key first")
+         entryp.delete("0", "end")
+    
+
+def clear():
+    text31.delete("1.0", "end")
+    quest.delete("1.0", "end")
+    gptwindow.update()
+    return
+
+
+def ins():
+
+    window.update()
+    inputbox.insert("end",text31.get("1.0", "end"))
+    text31.delete("1.0", "end")
+    messagebox.showinfo("Edge TTS", "已插入")
+    return
+
+def close():
+    print("close")
+    window.deiconify()
+    gptwindow.withdraw()
+    gptwindow.update()
+    quest.delete("1.0", "end")
+    text31.delete("1.0", "end")
+    window.update()
+    return
 voice='''Name: af-ZA-AdriNeural
 Gender: Female
 
@@ -1133,6 +1253,11 @@ but2.place(x=650, y=697, width=50, height=35)
 but3=tkinter.Button(window, text="生成保存并播放", font=("Microsoft YaHei", 15),command=save1)
 but3.pack()
 but3.place(x=540, y=497, width=200, height=35)
+but6=tkinter.Button(window, text="链接GPT", font=("Microsoft YaHei", 15),command=GPT)
+but6.pack()
+but6.place(x=600, y=760, width=190, height=35)
+
+
 window1=tkinter.Toplevel(window)
 window1.title("Edge TTS")
 window1.geometry("300x460")
@@ -1145,6 +1270,72 @@ label2.pack()
 label1.pack()
 text1.pack()
 botton4.pack()
+window1.protocol("WM_DELETE_WINDOW", window1.withdraw)
 window1.withdraw()
+
+
+gptwindow=tkinter.Toplevel(window)
+gptwindow.protocol("WM_DELETE_WINDOW", close)
+gptwindow.title("GPT-3")
+gptwindow.geometry("600x800")
+gptwindow.resizable(0,0)
+text31=tkinter.Text(gptwindow,font=("微软雅黑",12))
+text31.place(x=10,y=0,width=570,height=200)
+quest=tkinter.Text(gptwindow,font=("微软雅黑",12))
+quest.place(x=10,y=220,width=570,height=200)
+but7=tkinter.Button(gptwindow,text="生成",font=("微软雅黑",12),command=lambda:gpt3(quest.get("1.0", "end")))
+but7.place(x=10,y=430,width=570,height=40)
+l12=tkinter.Label(gptwindow,text="key:",font=("微软雅黑",12))
+l12.place(x=10,y=490)
+key=tkinter.Entry(gptwindow,font=("微软雅黑",12))
+key.place(x=90,y=490,width=400,height=35)
+but8=tkinter.Button(gptwindow,text="保存",font=("微软雅黑",12),command=lambda:savekey(key.get()))
+but8.place(x=500,y=490,width=50,height=35)
+setp=tkinter.Label(gptwindow,text="设置代理:",font=("微软雅黑",12))
+setp.place(x=10,y=533)
+entryp=tkinter.Entry(gptwindow,font=("微软雅黑",12))
+entryp.place(x=90,y=530,width=400,height=35)
+but9=tkinter.Button(gptwindow,text="设置",font=("微软雅黑",12),command=lambda:saveproxy(entryp.get()))
+but9.place(x=500,y=530,width=50,height=35)
+
+choose3=ttk.Combobox(gptwindow,font=("微软雅黑",12),width=15)
+list3=['not use proxy','use proxy']
+choose3['values']=list3
+choose3.pack(anchor="w")
+choose3.place(x=90, y=580)
+choose3.current(0)
+l13=tkinter.Label(gptwindow,text="proxy:",font=("微软雅黑",12))
+l13.place(x=10,y=580)
+but10=tkinter.Button(gptwindow,text="清空",font=("微软雅黑",12),command=lambda:clear())
+but10.place(x=10,y=620,width=100,height=35)
+but11=tkinter.Button(gptwindow,text="插入",font=("微软雅黑",12),command=lambda:ins())
+but11.place(x=120,y=620,width=100,height=35)    
+button5=tkinter.Button(gptwindow,text="关闭",font=("微软雅黑",12),command=close)
+button5.place(x=10,y=750,width=70,height=35)
+try:
+    fopen=open("config.txt","r")
+    text7=fopen.read()
+    fopen.close()
+    text7=text7.split("@@")
+
+    if len(text7)==1:
+        lb8=tkinter.Label(gptwindow,text="key:"+"true",font=("微软雅黑",12))
+        lb9=tkinter.Label(gptwindow,text="proxy:"+"none",font=("微软雅黑",12))
+        #放置到右下角
+        lb8.place(x=300,y=730)
+        lb9.place(x=300,y=760)
+        
+    else:
+        lb8=tkinter.Label(gptwindow,text="key:"+"true",font=("微软雅黑",12))
+        lb9=tkinter.Label(gptwindow,text="proxy:"+text7[1],font=("微软雅黑",12))
+        #放置到右下角
+        lb8.place(x=300,y=730)
+        lb9.place(x=300,y=760)
+except:
+    lb12=tkinter.Label(gptwindow,text="config.txt not found",font=("微软雅黑",12))
+    lb12.place(x=400,y=750)
+    
+gptwindow.withdraw()
+
 window.mainloop()
 
